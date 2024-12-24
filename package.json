@@ -1,0 +1,17 @@
+{
+  "name": "moongoose",
+  "version": "1.0.0",
+  "description": "a yt clone",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "javascript",
+    "backend",
+    "yt",
+    "clone"
+  ],
+  "author": "saifullah",
+  "license": "ISC"
+}
