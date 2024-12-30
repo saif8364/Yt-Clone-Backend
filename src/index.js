@@ -3,4 +3,21 @@ import connection from './db/connection.js';
 dotenv.config()
 
 
-connection();
+connection()
+.then(() => {
+    try{
+        app.listen(process.env.PORT,() => {
+            console.log("server is running");
+          }
+          )
+    }
+    catch(error){
+console.log("Error in listening Port.....",error);
+    }
+ 
+}
+)
+.catch((error) => {
+  console.log("db connection failed....",error)
+}
+)
