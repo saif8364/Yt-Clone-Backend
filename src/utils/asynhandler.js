@@ -1,16 +1,13 @@
 //
 
-const Asynchandler= (fn)=> async (req,res,next)=>
+const AsyncHandler= (requestHandler)=> 
 {
-   try{
-  await fn(req,res,next)
-   } 
-   catch(error)
-   {
-console.log(error,res.status(error.code));
+   return(req,res,next)=>{
+      Promise.resolve(requestHandler(req,res,next)).catch
+      ((err)=>next(err))
    }
 }
 
 
 
-export default Asynchandler;
+export default AsyncHandler;
