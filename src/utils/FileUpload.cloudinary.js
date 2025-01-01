@@ -10,15 +10,13 @@ import fs from "fs"
         api_secret:process.env.Cloudinary_Api_Secret // Click 'View API Keys' above to copy your API secret
     })};
 
-    async function Upload_File(file_path)
+   const Upload_File= async function Upload_File(file_path)
     {
         try{
             if (!file_path) return null;
-            cloudinary.v2.uploader.upload(file_path,{resource_type:"auto"},(error,result) => {
-                console.log(result);
-               cout<<"File uploaded Successfully";
-              }
-              )
+           const response= await cloudinary.v2.uploader.upload(file_path,{resource_type:"auto"})
+           console.log("file uploaded successfully",response.url);
+           return response
         }
         catch(error)
         {
