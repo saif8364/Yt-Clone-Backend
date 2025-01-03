@@ -33,9 +33,9 @@ const RegisterUser=AsyncHandler(
   //check if files 
   
  
-  
-   const avatar_path= req.files.avatar[0].path;
-const cover_path= req.files.cover[0].path;
+    
+   const avatar_path= req.files?.avatar[0]?.path;
+const cover_path= req.files?.cover[0]?.path;
 
  console.log("Avatar PAth: ",avatar_path," Cover image Path: ",cover_path);
 
@@ -45,15 +45,14 @@ const cover_path= req.files.cover[0].path;
         throw new apiError(500,"Avatar required")
     }
     console.log("avatar path is getted");
-
 //uploading file to cloudinary
-
+     
     const Avatar=await Upload_File(avatar_path);
     console.log(Avatar);
      const Cover= await Upload_File(cover_path); 
      console.log(Cover);
     //again checking if avatar is uploaded or not as its a  required field
-    if(!Avatar)
+    if(!Avatar) 
       {
         throw new apiError(500,"Avatar not Found or avatar not uploaded");
       }

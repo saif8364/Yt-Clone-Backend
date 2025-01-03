@@ -17,14 +17,17 @@ cloudinary.config({
     // Checking if Cloudinary is initialized properly
 
   
-    if (!cloudinary ) {
+    if (!cloudinary ) { 
         throw new Error('Cloudinary is not initialized properly.');
     }
 
     try {
-        console.log("File Uploading.....",file_path);
-            const response = await cloudinary.uploader.upload(file_path, { resource_type: 'auto' });
+        console.log("File Uploading.....");
+            const response = await cloudinary.uploader.upload(file_path, { resource_type: 'auto'});
             console.log('File uploaded successfully', response.url);
+            //after file is send to cloudinary we have to unlink the file
+           
+            fs.unlinkSync(file_path)
             return response;
 
     } catch (error) {
