@@ -10,7 +10,7 @@ Userrouter.route("/register").post(
             maxCount:1
         },
         {
-           name  :"Cover_Image",
+           name  :"cover",
            maxCount:1,
         }
     ]),

@@ -5,53 +5,67 @@ import { User } from "../models/user.model.js";
 import Upload_File from "../utils/FileUpload.cloudinary.js";
 import ApiResponse from "../utils/ApiResponse.js";
 
+
 const RegisterUser=AsyncHandler(
   async  (req,res) => {
     const {username,email,FullName,Password}=req.body
     //validation for empty fields
+    console.log("validating empty fields done");
     if (username === "" || email === "" || FullName === "" || Password === "") {
+      
       throw new apiError(500, "All Fields Are Required");
     }
     
     
  //check if user already exists
 
-
+ console.log("checking if username already existed/.......");
      const isFound= await User.findOne({
         $or:[{username},{email}]
         })
 
         if(isFound)
         {
-           cout<<"Email or Username already In Use";
+          
            throw new apiError (409,"email ,username already existed");
         }
 
   //check if files 
-    
-  const avatar_local_path=req.files?.avatar[0]?.path;
-  const cover_img_local_path=req.files?.Cover_Image[0]?.path;
+  
+ 
+  
+   const avatar_path= req.files.avatar[0].path;
+const cover_path= req.files.cover[0].path;
 
-  if(!avatar_local_path)
-    {
+ console.log("Avatar PAth: ",avatar_path," Cover image Path: ",cover_path);
+
+//checking if avatar_path got the url
+  if(!avatar_path)
+    {   
         throw new apiError(500,"Avatar required")
-
     }
+    console.log("avatar path is getted");
 
 //uploading file to cloudinary
-    const avatar=await Upload_File(avatar_local_path); const cover= await Upload_File(cover_img_local_path); 
+
+    const Avatar=await Upload_File(avatar_path);
+    console.log(Avatar);
+     const Cover= await Upload_File(cover_path); 
+     console.log(Cover);
     //again checking if avatar is uploaded or not as its a  required field
-    if(!avatar)
+    if(!Avatar)
       {
         throw new apiError(500,"Avatar not Found or avatar not uploaded");
       }
+      console.log("pic uploded to Cloudinary");
 
 
       //noe saving data to db
 
      const user=await User.create({
-        username:username.toLowerCase(),FullName,Password,email,avatar:avatar.url,cover:cover?.url || ""
+        username:username.toLowerCase(),FullName,Password,email,avatar:Avatar.url,cover:Cover?.url || ""
       })
+      
 // hm checking if data is saved?
 
     const CreatedUser= await User.findById(user._id).select(
@@ -62,8 +76,10 @@ const RegisterUser=AsyncHandler(
      {
       throw new apiError(500,"Problem while Regestring User")
      }
+     console.log("user entry done");
 
 //giving Response
+console.log(CreatedUser);
     return res.status(200).json(
       new ApiResponse(200,CreatedUser,"User Registered Successfuly")
     )
