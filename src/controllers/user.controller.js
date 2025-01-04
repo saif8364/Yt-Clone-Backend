@@ -4,6 +4,7 @@ import  connection from "../db/connection.js"
 import { User } from "../models/user.model.js";
 import Upload_File from "../utils/FileUpload.cloudinary.js";
 import ApiResponse from "../utils/ApiResponse.js";
+import bcrypt from "bcrypt"
 
 
 const RegisterUser=AsyncHandler(
@@ -85,13 +86,78 @@ console.log(CreatedUser);
 
     })
 
-   
-   
-    
-    
+
+  const LoginUser=AsyncHandler(
+    async(req,res) => {
+      
+      const {username,Password,email}=req.body;
+      console.log(req.body);
+      console.log(username,Password,email);
+      if(!username || !email && !Password)
+        {
+          throw new apiError(500,"Fields are Required")
+        }
+        
+
+        const user = await User.findOne({
+          $or:[{username},{email}]
+        } );
+
+        if(!user)
+          {
+            throw new apiError(400,"user or email not found ")
+          }
+
+         const Hashed= await user.isPasswordCorrect(Password);
+         if(!Hashed)
+          {
+            throw new apiError(300,"iNCORRECT pASSWORD");
+          }
+         
+          //now saving refresh token to db anad access token to cookies
+         const access_token= user.Generate_Access_Token();
+         const refresh_token=user.Generate_Refresh_Token();
+          user.RefreshToken=refresh_token;
+         await user.save({validateBeforeSave:false})
+
+         //as we dont wnt to spoil our password etc
+         const loggedInUser=await User.findById(user._id).select("-Password -RefreshToken")
 
 
-    
+          const options={
+            secure:true,
+            httpOnly:true
+          }
+          
+          
+         return res.status(200)
+         .cookie("AccessToken",`${access_token}`,options)
+         .cookie("RefreshToken",`${refresh_token}`,options)
+         .json(new ApiResponse(200,user,"User LOgged In Suceessfully"));
+            
+    })
 
 
-export default RegisterUser
+    const LogoutUser=AsyncHandler(
+      async (req,res)=>{
+           //now heres the prob we dont habv the credentials of the usser who logged in nor his ID or email etc so here we use miidleware of our own
+         await  User.findByIdAndUpdate(req.user._id,{
+              $set:{RefreshToken:undefined,}
+            })
+
+
+           const options={
+            secure:true,
+            httpOnly:true
+          }
+
+          return res.status(200)
+          .clearCookie("AccessToken",options)
+          .clearCookie("RefreshToken",options)
+          .json(new ApiResponse(200,"","User Logged Out Successfully"))
+      }
+    )
+
+
+export   {RegisterUser,LoginUser,LogoutUser}
+ 

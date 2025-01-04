@@ -1,6 +1,7 @@
 import {Router} from "express"
-import RegisterUser from "../controllers/user.controller.js";
+import {RegisterUser,LoginUser,LogoutUser} from "../controllers/user.controller.js";
 import { upload } from "../middlewares/Multer.js";
+import VerifyJWT from "../middlewares/Auth.js";
 
 const Userrouter=Router();
 Userrouter.route("/register").post(
@@ -16,6 +17,11 @@ Userrouter.route("/register").post(
     ]),
     RegisterUser
 )
+Userrouter.route("/login").post(LoginUser)
+
+//SECURED ROUTES
+//here the middleware 1st execute thyen it passes control to the LogoutUser ..so thats the reason we use next() in middleware
+Userrouter.route("/logout").post(VerifyJWT,LogoutUser)
 
 
 
