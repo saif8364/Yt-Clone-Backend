@@ -6,6 +6,7 @@ class apiError extends Error{
            this.message=message;
            this.errors=errors;
            this.success=false
+           
 
     }
 }

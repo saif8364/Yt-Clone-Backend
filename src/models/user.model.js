@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import jwt from "jsonwebtoken"
 import bcrypt from "bcrypt"
 
+
 const UserSchema= new mongoose.Schema(
     {
        watchHistory:[
@@ -51,7 +52,7 @@ UserSchema.methods.isPasswordCorrect=async function(password)
    return await  bcrypt.compare(password,this.Password)
 }
 
-UserSchema.methods.Generate_Access_Token=async function(){
+UserSchema.methods.Generate_Access_Token= function(){
     return jwt.sign(
         {
             _id:this._id,
@@ -65,7 +66,7 @@ UserSchema.methods.Generate_Access_Token=async function(){
         }
     )
 }
-UserSchema.methods.Generate_Refresh_Token=async function(){
+UserSchema.methods.Generate_Refresh_Token=function(){
     return jwt.sign(
         {
             _id:this._id,

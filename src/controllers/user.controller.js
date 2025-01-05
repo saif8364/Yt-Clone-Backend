@@ -4,6 +4,7 @@ import  connection from "../db/connection.js"
 import { User } from "../models/user.model.js";
 import Upload_File from "../utils/FileUpload.cloudinary.js";
 import ApiResponse from "../utils/ApiResponse.js";
+import jwt from "jsonwebtoken"
 import bcrypt from "bcrypt"
 
 
@@ -91,8 +92,7 @@ console.log(CreatedUser);
     async(req,res) => {
       
       const {username,Password,email}=req.body;
-      console.log(req.body);
-      console.log(username,Password,email);
+      
       if(!username || !email && !Password)
         {
           throw new apiError(500,"Fields are Required")
@@ -129,11 +129,11 @@ console.log(CreatedUser);
             httpOnly:true
           }
           
-          
+
          return res.status(200)
-         .cookie("AccessToken",`${access_token}`,options)
-         .cookie("RefreshToken",`${refresh_token}`,options)
-         .json(new ApiResponse(200,user,"User LOgged In Suceessfully"));
+         .cookie("AccessToken",access_token,options)
+         .cookie("RefreshToken",refresh_token,options)
+         .json(new ApiResponse(200,loggedInUser,"User LOgged In Suceessfully"));
             
     })
 
@@ -158,6 +158,45 @@ console.log(CreatedUser);
       }
     )
 
+    const RefreshAccessToken=AsyncHandler(
+      async (req,res)=>{
+          const token=req.cookies.RefreshToken;
+          if(!token)
+            {
+              throw new apiError(500,"Token isnt found in cookies");
+            }
+          const decodedToken=jwt.verify(token,process.env.Refresh_Token_Secret);
+          if(!decodedToken)
+            {
+              throw apiError(500,"invalid token ")
+            }
+         const user= await User.findById(decodedToken._id)
+         console.log(user);
 
-export   {RegisterUser,LoginUser,LogoutUser}
+
+        if(await user.RefreshToken==token) 
+          {
+            const new_refresh_token=user.Generate_Refresh_Token()
+              const new_access_token= user.Generate_Access_Token();
+              console.log("new access token and refresh token:",new_access_token,"  ",new_refresh_token)
+              const options={
+                secure:true,
+                httpOnly:true
+              }
+              user.RefreshToken=new_refresh_token;
+              await user.save({validateBeforeSave:false})
+
+              return res.status(200)
+         .cookie("AccessToken",new_access_token,options)
+         .cookie("RefreshToken",new_refresh_token,options)
+         .json(new ApiResponse(200,user,"User LOgged In Suceessfully"));
+ 
+          }
+          else{
+            throw new apiError(500,"invalid token ...token doesnt match");
+          }
+      }
+    )
+
+export   {RegisterUser,LoginUser,LogoutUser,RefreshAccessToken}
  
