@@ -198,5 +198,35 @@ console.log(CreatedUser);
       }
     )
 
+    const ChangeCurrentPassword= AsyncHandler(
+      async  (req,res) => {
+        const {CurrentPass,Newpass,confirmNewpass}=req.body;
+       let user= await User.findById(req.user._id);
+       const isPassCorrect=await user.isPasswordCorrect(CurrentPass)
+
+       if(!isPassCorrect)
+        {
+          throw new apiError(300,"Incorrect Current Password")
+        }
+
+         user.Password=Newpass;
+         await user.save({validateBeforeSave:false})
+
+         return res.status(200)
+         .json(new ApiResponse(200,{},"Password Changed Successfully"));
+      }   
+      )
+
+
+ //saif is
+      const getCurrentUser=AsyncHandler(
+        (req,res) => {
+          return res.status(200)
+          .json(new ApiResponse(200,req.user,"User data"))
+        }
+       
+      
+    )
+
 export   {RegisterUser,LoginUser,LogoutUser,RefreshAccessToken}
  
